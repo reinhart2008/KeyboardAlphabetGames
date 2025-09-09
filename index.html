@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Alphabet Learning Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #3494e6, #ec6ead);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #2c3e50;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 25px;
+            margin-top: 20px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #3498db, #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .instructions {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            color: #34495e;
+            line-height: 1.5;
+            padding: 0 10px;
+        }
+        
+        .keyboard-container {
+            position: relative;
+            margin: 30px auto;
+            width: 100%;
+            background: #2c3e50;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            overflow: visible;
+        }
+        
+        .keyboard {
+            background: #7f8c8d;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .keyboard-row {
+            display: flex;
+            margin-bottom: 12px;
+            justify-content: center;
+        }
+        
+        .key {
+            width: 60px;
+            height: 60px;
+            margin: 0 6px;
+            background: linear-gradient(to bottom, #f5f5f5, #e0e0e0);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            box-shadow: 0 4px 0 #bbb, inset 0 0 8px rgba(255, 255, 255, 0.8);
+            transition: all 0.1s ease;
+            user-select: none;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .key:hover {
+            background: linear-gradient(to bottom, #fff, #e8e8e8);
+        }
+        
+        .key:active, .key.highlight {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #bbb, inset 0 0 8px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(to bottom, #ffeb3b, #fbc02d);
+        }
+        
+        .key.space {
+            width: 300px;
+        }
+        
+        .key.special {
+            background: linear-gradient(to bottom, #95a5a6, #7f8c8d);
+            color: white;
+        }
+        
+        .key.learned {
+            background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+            color: white;
+        }
+        
+        .hand-container {
+            position: absolute;
+            z-index: 100;
+            transition: all 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .hand {
+            font-size: 40px;
+            transform: rotate(-45deg);
+            color: #ff5722;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+            position: absolute;
+            bottom: -5px;
+            left: -5px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(to right, #3498db, #2980b9);
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #1c5a7d;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 0 #1c5a7d;
+        }
+        
+        button:active {
+            transform: translateY(5px);
+            box-shadow: 0 0 0 #1c5a7d;
+        }
+        
+        #playSound {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            box-shadow: 0 5px 0 #7e261c;
+        }
+        
+        #playSound:hover {
+            box-shadow: 0 8px 0 #7e261c;
+        }
+        
+        .dialogue {
+            background: #e9f7ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 25px 0;
+            border: 3px dashed #3498db;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .dialogue h2 {
+            color: #3498db;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+        
+        .dialogue p {
+            margin: 12px 0;
+            font-size: 18px;
+            line-height: 1.5;
+            padding: 8px 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .current-letter {
+            text-align: center;
+            font-size: 100px;
+            color: #e74c3c;
+            margin: 20px 0;
+            text-shadow: 4px 4px 0 #ff9d00;
+            height: 120px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .score {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 15px;
+            color: #2c3e50;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            margin: 15px 0;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+        
+        /* Fireworks */
+        .firework {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+        }
+        
+        .celebration-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: pulse 2s infinite;
+        }
+        
+        .celebration-content h2 {
+            font-size: 3rem;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+        
+        .celebration-content p {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @media (max-width: 768px) {
+            .key {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+                margin: 0 4px;
+            }
+            
+            .key.space {
+                width: 200px;
+            }
+            
+            .hand {
+                font-size: 30px;
+            }
+            
+            .hand-container {
+                width: 30px;
+                height: 30px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            button {
+                padding: 12px 20px;
+                font-size: 16px;
+            }
+            
+            .current-letter {
+                font-size: 80px;
+                height: 100px;
+            }
+            
+            .celebration-content {
+                padding: 20px;
+            }
+            
+            .celebration-content h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Keyboard Alphabet Learning Game</h1>
+        <div class="score">Letters Learned: <span id="counter">0</span>/26</div>
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="instructions">
+            <p>Listen to the 26 letters. Find them on the keyboard. Then practise with a partner.</p>
+        </div>
+        
+        <div class="current-letter" id="currentLetter">A</div>
+        
+        <div class="controls">
+            <button id="randomLetter">
+                <i class="fas fa-random"></i> Random Letter
+            </button>
+            <button id="playSound">
+                <i class="fas fa-volume-up"></i> Play Sound
+            </button>
+        </div>
+        
+        <div class="keyboard-container">
+            <div class="hand-container" id="handContainer">
+                <div class="hand">👉</div>
+            </div>
+            <div class="keyboard">
+                <div class="keyboard-row">
+                    <div class="key" data-letter="Q">Q</div>
+                    <div class="key" data-letter="W">W</div>
+                    <div class="key" data-letter="E">E</div>
+                    <div class="key" data-letter="R">R</div>
+                    <div class="key" data-letter="T">T</div>
+                    <div class="key" data-letter="Y">Y</div>
+                    <div class="key" data-letter="U">U</div>
+                    <div class="key" data-letter="I">I</div>
+                    <div class="key" data-letter="O">O</div>
+                    <div class="key" data-letter="P">P</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="key" data-letter="A">A</div>
+                    <div class="key" data-letter="S">S</div>
+                    <div class="key" data-letter="D">D</div>
+                    <div class="key" data-letter="F">F</div>
+                    <div class="key" data-letter="G">G</div>
+                    <div class="key" data-letter="H">H</div>
+                    <div class="key" data-letter="J">J</div>
+                    <div class="key" data-letter="K">K</div>
+                    <div class="key" data-letter="L">L</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="key" data-letter="Z">Z</div>
+                    <div class="key" data-letter="X">X</div>
+                    <div class="key" data-letter="C">C</div>
+                    <div class="key" data-letter="V">V</div>
+                    <div class="key" data-letter="B">B</div>
+                    <div class="key" data-letter="N">N</div>
+                    <div class="key" data-letter="M">M</div>
+                    <div class="key special">←</div>
+                </div>
+                <div class="keyboard-row">
+                    <div class="key space"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dialogue">
+            <h2>Practice Dialogue</h2>
+            <p><strong>Student A:</strong> Where is <span id="letterToFind">A</span>?</p>
+            <p><strong>Student B:</strong> <span id="letterToFind2">A</span> is here.</p>
+        </div>
+    </div>
+
+    <div class="celebration" id="celebration">
+        <div class="celebration-content">
+            <h2>🎉 Congratulations! 🎉</h2>
+            <p>You've learned all 26 letters!</p>
+            <button onclick="closeCelebration()">
+                <i class="fas fa-check"></i> Continue Learning
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const handContainer = document.getElementById('handContainer');
+            const randomLetterBtn = document.getElementById('randomLetter');
+            const playSoundBtn = document.getElementById('playSound');
+            const currentLetterElem = document.getElementById('currentLetter');
+            const letterToFindElem = document.getElementById('letterToFind');
+            const letterToFindElem2 = document.getElementById('letterToFind2');
+            const keys = document.querySelectorAll('.key');
+            const counterElem = document.getElementById('counter');
+            const progressBar = document.getElementById('progressBar');
+            const celebration = document.getElementById('celebration');
+            
+            let currentLetter = 'A';
+            let learnedLetters = new Set();
+            let practiceCounter = 0;
+            
+            // Function to point to a random letter
+            function pointToRandomLetter() {
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+                currentLetter = randomLetter;
+                
+                // Update display
+                currentLetterElem.textContent = randomLetter;
+                letterToFindElem.textContent = randomLetter;
+                letterToFindElem2.textContent = randomLetter;
+                
+                // Find the key element
+                const keyElement = Array.from(keys).find(key => key.getAttribute('data-letter') === randomLetter);
+                
+                if (keyElement) {
+                    // Remove highlight from all keys
+                    keys.forEach(key => key.classList.remove('highlight'));
+                    
+                    // Add highlight to the selected key
+                    keyElement.classList.add('highlight');
+                    
+                    // Position the hand at the bottom-left corner of the key
+                    const keyRect = keyElement.getBoundingClientRect();
+                    const containerRect = document.querySelector('.keyboard-container').getBoundingClientRect();
+                    
+                    // Calculate exact position for hand (bottom-left corner of the key)
+                    const handLeft = keyRect.left - containerRect.left - 15;
+                    const handTop = keyRect.bottom - containerRect.top - 15;
+                    
+                    handContainer.style.left = handLeft + 'px';
+                    handContainer.style.top = handTop + 'px';
+                    
+                    // Play the letter sound
+                    playLetterSound(randomLetter);
+                }
+            }
+            
+            // Function to play letter sound using external API
+            function playLetterSound(letter) {
+                // Use Google Text-to-Speech API (works in most browsers)
+                const speech = new SpeechSynthesisUtterance(letter);
+                speech.lang = 'en-US';
+                speech.rate = 0.8;
+                speech.pitch = 1.2;
+                
+                // Add event listener for when speech starts
+                speech.onstart = function() {
+                    console.log("Playing sound for letter:", letter);
+                };
+                
+                // Add event listener for errors
+                speech.onerror = function(event) {
+                    console.error("Speech synthesis error:", event.error);
+                    // Fallback: Use audio files if available
+                    fallbackSound(letter);
+                };
+                
+                window.speechSynthesis.speak(speech);
+            }
+            
+            // Fallback function using audio files
+            function fallbackSound(letter) {
+                // This is a fallback - in a real application, you would have audio files
+                console.log("Using fallback for letter:", letter);
+                // You can add actual audio files here if needed
+            }
+            
+            // Function to create fireworks
+            function createFireworks() {
+                for (let i = 0; i < 100; i++) {
+                    setTimeout(() => {
+                        createFirework();
+                    }, i * 30);
+                }
+            }
+            
+            function createFirework() {
+                const firework = document.createElement('div');
+                firework.classList.add('firework');
+                
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                
+                firework.style.backgroundColor = color;
+                firework.style.left = Math.random() * 100 + 'vw';
+                firework.style.top = Math.random() * 100 + 'vh';
+                
+                document.body.appendChild(firework);
+                
+                // Animate the firework
+                const size = Math.random() * 20 + 10;
+                const moveX = (Math.random() - 0.5) * 200;
+                const moveY = (Math.random() - 0.5) * 200;
+                
+                firework.animate([
+                    { transform: 'translate(0, 0)', opacity: 1, width: '5px', height: '5px' },
+                    { transform: `translate(${moveX}px, ${moveY}px)`, opacity: 0, width: `${size}px`, height: `${size}px` }
+                ], {
+                    duration: 2000,
+                    easing: 'ease-out'
+                });
+                
+                // Remove after animation
+                setTimeout(() => {
+                    firework.remove();
+                }, 2000);
+            }
+            
+            // Function to show celebration
+            function showCelebration() {
+                celebration.style.display = 'flex';
+                createFireworks();
+                
+                // Continue fireworks every 2 seconds
+                const fireworksInterval = setInterval(() => {
+                    createFireworks();
+                }, 2000);
+                
+                // Stop fireworks after 10 seconds
+                setTimeout(() => {
+                    clearInterval(fireworksInterval);
+                }, 10000);
+            }
+            
+            // Function to close celebration
+            window.closeCelebration = function() {
+                celebration.style.display = 'none';
+            };
+            
+            // Event listeners
+            randomLetterBtn.addEventListener('click', pointToRandomLetter);
+            playSoundBtn.addEventListener('click', () => playLetterSound(currentLetter));
+            
+            // Initialize with a random letter
+            pointToRandomLetter();
+            
+            // Add click event to keys for practice
+            keys.forEach(key => {
+                if (key.getAttribute('data-letter')) {
+                    key.addEventListener('click', () => {
+                        const letter = key.getAttribute('data-letter');
+                        currentLetter = letter;
+                        currentLetterElem.textContent = currentLetter;
+                        letterToFindElem.textContent = currentLetter;
+                        letterToFindElem2.textContent = currentLetter;
+                        
+                        // Remove highlight from all keys
+                        keys.forEach(k => k.classList.remove('highlight'));
+                        
+                        // Add highlight to the clicked key
+                        key.classList.add('highlight');
+                        
+                        // Mark as learned
+                        if (!learnedLetters.has(letter)) {
+                            learnedLetters.add(letter);
+                            key.classList.add('learned');
+                            practiceCounter = learnedLetters.size;
+                            counterElem.textContent = practiceCounter + '/26';
+                            progressBar.style.width = (practiceCounter / 26 * 100) + '%';
+                            
+                            // Check if all letters are learned
+                            if (practiceCounter === 26) {
+                                setTimeout(showCelebration, 1000);
+                            }
+                        }
+                        
+                        // Position the hand at the bottom-left corner of the key
+                        const keyRect = key.getBoundingClientRect();
+                        const containerRect = document.querySelector('.keyboard-container').getBoundingClientRect();
+                        
+                        // Calculate exact position for hand (bottom-left corner of the key)
+                        const handLeft = keyRect.left - containerRect.left - 15;
+                        const handTop = keyRect.bottom - containerRect.top - 15;
+                        
+                        handContainer.style.left = handLeft + 'px';
+                        handContainer.style.top = handTop + 'px';
+                        
+                        // Play the letter sound
+                        playLetterSound(currentLetter);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
